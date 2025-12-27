@@ -1,5 +1,5 @@
 {
-  "name": "my-qwik-empty-starter",
+  "name": "qwik-template",
   "description": "Blank project with routing included",
   "private": true,
   "type": "module",
