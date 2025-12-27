@@ -41,6 +41,7 @@ const ListUser = component$(() => {
                 <p class="w-1/3">{(user.name)}</p>
                 <p >{user.email}</p>
               </div>
+              
             </li>
           ))}
         </ul>
