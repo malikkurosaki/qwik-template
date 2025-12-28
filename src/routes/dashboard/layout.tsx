@@ -185,6 +185,16 @@ export const ModalMenu = component$(
           <div class="p-4 font-bold text-lg border-b border-slate-700">
             My Dashboard
           </div>
+          <button
+            class="w-full p-4 text-left hover:bg-slate-700"
+            onClick$={async () => {
+              await authClient.signOut()
+              openSignal.value = false
+              window.location.href = "/login"
+            }}
+          >
+            Logout
+          </button>
         </div>
       </div>
     );

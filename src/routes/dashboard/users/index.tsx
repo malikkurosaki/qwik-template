@@ -32,16 +32,18 @@ const ListUser = component$(() => {
   return (
     <div class="space-y-4 bg-white p-4 rounded shadow ">
       <h2 class="text-xl font-bold">List User</h2>
+      {/* {JSON.stringify(listUser)} */}
       <Resource value={listUser} onPending={() => <div>Loading...</div>} onResolved={(listUser) => (
         <ul>
           {listUser?.map((user) => (
             <li key={user.id}>
-              <div class="flex items-center gap-2">
+              <div class="flex items-center gap-2 flex-wrap">
                 <MatAccountBoxRound />
-                <p class="w-1/3">{(user.name)}</p>
-                <p >{user.email}</p>
+                <p class="w-[200px] text-ellipsis overflow-hidden">{(user.name)}</p>
+                <p class="w-[200px] text-ellipsis overflow-hidden">{user.email}</p>
+                <p class="w-[200px] text-ellipsis overflow-hidden">{user.providerId}</p>
               </div>
-              
+
             </li>
           ))}
         </ul>
