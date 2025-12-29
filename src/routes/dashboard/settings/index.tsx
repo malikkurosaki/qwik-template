@@ -1,4 +1,4 @@
-import { $, component$, useSignal, useStore, useTask$ } from "@builder.io/qwik";
+import { $, component$, Resource, useSignal, useStore } from "@builder.io/qwik";
 import { routeLoader$, useNavigate } from "@builder.io/qwik-city";
 import { MatContentCopyRound, MatDeleteRound } from "@qwikest/icons/material";
 import dayjs from "dayjs";
@@ -37,30 +37,23 @@ export default component$(() => {
 
 const ListApikey = component$(() => {
     const loader = useLoadListApikey();
+    const nav = useNavigate();
 
-    // ⬇️ copy sekali dari loader
-    const listApikey = useStore<{ items: typeof loader.value }>({
-        items: loader.value ?? [],
-    });
-
-    useTask$(({ track }) => {
-        track(() => loader.value);
-        listApikey.items = loader.value ?? [];
-    });
     return (
         <div class="space-y-4 bg-white p-4 rounded shadow ">
             <h1 class="text-2xl font-bold">List Apikey</h1>
-            {listApikey.items?.map((item) => (
-                <div key={item.id} class="flex items-center justify-between">
-                    <p class="font-bold text-left w-1/3">{item.name}</p>
-                    <p class="text-slate-500 text-left w-1/3">{item.description}</p>
-                    <p class="text-slate-500 text-left w-1/3">{dayjs(item.expiredAt).format("YYYY-MM-DD HH:mm")}</p>
+            <Resource 
+            value={loader}
+            onPending={() => <div>Loading...</div>}
+            onResolved={(items) => (
+                <div class="space-y-4">
+                    {items?.map((item) => (
+                        <div key={item.id} class="flex items-center justify-between">
+                            <p class="font-bold text-left w-1/3">{item.name}</p>
+                            <p class="text-slate-500 text-left w-1/3">{item.description}</p>
+                            <p class="text-slate-500 text-left w-1/3">{dayjs(item.expiredAt).format("YYYY-MM-DD HH:mm")}</p>
                     {/* copy button */}
                     <div class="flex gap-2 items-center justify-center">
-                        {/* <button class="text-slate-500" onClick$={() => {
-                            navigator.clipboard.writeText(item.token ?? "")
-                            alert("Copied to clipboard")
-                        }}>Copy</button> */}
                         <MatContentCopyRound class="text-slate-500" onClick$={() => {
                             navigator.clipboard.writeText(item.token ?? "")
                             alert("Copied to clipboard")
@@ -74,13 +67,16 @@ const ListApikey = component$(() => {
                                 }
                             })
 
-                            listApikey.items = listApikey.items!.filter(
-                                (i) => i.id !== item.id
-                            );
+                            await nav(`/dashboard/settings?r=${Date.now()}`);
+
                         }} />
                     </div>
                 </div>
             ))}
+            </div>
+            )}
+            onRejected={(error) => <div>Error: {error.message}</div>}
+            />
         </div>
     )
 })
@@ -94,10 +90,11 @@ const CreateApikey = component$(() => {
         expiredAt: dayjs().add(1, "year").format("YYYY-MM-DD")
     })
 
+    
     const handleSubmit = $(async () => {
         try {
             loading.value = true
-            const { data } = await apiContract.api.settings.apikey.post({
+            await apiContract.api.settings.apikey.post({
                 name: formData.name,
                 description: formData.description,
                 expiredAt: formData.expiredAt
@@ -106,7 +103,10 @@ const CreateApikey = component$(() => {
                     credentials: "include"
                 }
             })
-            console.log(data?.data)
+
+            formData.name = ""
+            formData.description = ""
+            formData.expiredAt = dayjs().add(1, "year").format("YYYY-MM-DD")
             await nav(`/dashboard/settings?r=${Date.now()}`);
         } catch (error) {
             console.log(error)
